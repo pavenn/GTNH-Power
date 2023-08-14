@@ -47,9 +47,13 @@ function convert_value(eu, format)
 	else
 		exp  = math.floor(math.log(eu, 1000))
 		tier = math.floor(math.log(eu/8, 4))
+    if tier > 14 then
+      tier = 14
+    end
+    
 	end
 
-    local tiers_str = { [0]="", "LV", "MV", "HV", "EV", "IV", "LuV", "ZPM", "UV", "UHV", "UHV+" }
+    local tiers_str = { [0]="", "LV", "MV", "HV", "EV", "IV", "LuV", "ZPM", "UV", "UHV", "UEV", "UIV", "UMV", "UXV", "MAX" }
     local prefx_str = { [0]=" ", "K", "M", "G", "T", "P", "E", "Z", "Y"}
     
     if format == "e" or format == "E" then
@@ -87,9 +91,9 @@ function draw_legend()
 
     for loc = 0, 100, 10
     do
-        term.setCursor(offset + loc, visual_y_start + 11)
-        term.write(loc)
         term.setCursor(offset + loc, visual_y_start + 12)
+        term.write(loc)
+        term.setCursor(offset + loc, visual_y_start + 13)
         term.write("|")
     end
 end
@@ -166,27 +170,27 @@ function draw_direction(io)
     if is_neg == 1
     then
         gpu.setForeground(clr.RED)
-        term.setCursor(offset, visual_y_start + 15)
+        term.setCursor(offset, visual_y_start + 16)
         term.write(base_bar1)
-        term.setCursor(offset - 1, visual_y_start + 16)
+        term.setCursor(offset - 1, visual_y_start + 17)
         term.write(base_bar2)
-        term.setCursor(offset, visual_y_start + 17)
+        term.setCursor(offset, visual_y_start + 18)
         term.write(base_bar3)
         gpu.setForeground(fg_default)
     else
         gpu.setForeground(clr.GREEN)
-        term.setCursor(offset, visual_y_start + 15)
-        term.write(base_bar1)
         term.setCursor(offset, visual_y_start + 16)
-        term.write(base_bar2)
+        term.write(base_bar1)
         term.setCursor(offset, visual_y_start + 17)
+        term.write(base_bar2)
+        term.setCursor(offset, visual_y_start + 18)
         term.write(base_bar3)
         gpu.setForeground(fg_default)
     end
 end
 
 function draw_visuals(percent)
-  term.setCursor(offset, visual_y_start + 13)
+  term.setCursor(offset, visual_y_start + 14)
   for check = 0, 100, 1
   do
     if check <= percent
@@ -263,7 +267,7 @@ function DrawStaticScreen()
 
     -- Draw percentage 
     term.setCursor(30,visual_y_start + 3)
-    term.write("Percent Full:        ")
+    term.write("Percent Full:         ")
 
     -- Draw Actual In
     term.setCursor(30,visual_y_start + 4)
@@ -283,12 +287,19 @@ function DrawStaticScreen()
       term.write("Average EU Change/t: ")
     end
 
+    -- Draw time till empty
+    term.setCursor(30, visual_y_start + 7)
+    term.write("Time till full: ")
+
+
+  
+
     -- Draw Maintenance status
-    term.setCursor(30,visual_y_start + 8)
+    term.setCursor(30,visual_y_start + 9)
     term.write("Maintenance status:  ")
 
     -- Draw Generator Status
-    term.setCursor(30,visual_y_start + 9)
+    term.setCursor(30,visual_y_start + 10)
     term.write("Generators status:   ")
 
     -- Draw Pointline
@@ -350,7 +361,7 @@ function DrawDynamicScreen()
     -- Draw percentage 
     term.setCursor(30 + 21, visual_y_start + 3)
     gpu.setForeground(fg_color_percent)
-    term.write(string.format("%.5f %s", percentenergy, " %")); eol();
+    term.write(string.format(" %.5f %s", percentenergy, " %")); eol();
     gpu.setForeground(fg_default)
 
     -- Draw Actual In
@@ -372,8 +383,24 @@ function DrawDynamicScreen()
     if ioratechange ~= nil then term.write(ioratechange); eol(); end
     gpu.setForeground(fg_default)
 
+
+    -- Draw time till empty
+    term.setCursor(30+21, visual_y_start + 7)
+    empty_time = ((storedenergyinit/iorate)/20)/3600
+    gpu.setForeground(fg_color_io)
+
+    if iorate < 0 then
+      term.write((math.floor(empty_time*10)/10) .. "h"); eol();
+    else
+      full_time = ((maxenergyinit-storedenergyinit)/iorate)/72000
+      term.write(" "..math.floor(full_time) .. "h"); eol();
+    end    
+    gpu.setForeground(fg_default)
+    
+
+
     -- Draw Maintenance status
-    term.setCursor(30 + 21, visual_y_start + 8)
+    term.setCursor(30 + 21, visual_y_start + 9)
     if MStatus == "Working perfectly" then MColor = clr.GREEN else MColor = clr.RED end
     gpu.setForeground(MColor)
     if MColor == clr.RED then gpu.setBackground(clr.YELLOW) end
@@ -382,7 +409,7 @@ function DrawDynamicScreen()
     gpu.setBackground(clr.BLACK)
 
     -- Draw Generator Status
-    term.setCursor(30 + 21, visual_y_start + 9)
+    term.setCursor(30 + 21, visual_y_start + 10)
     gpu.setForeground(fg_default)
     term.write(statusRS); eol();
     gpu.setForeground(fg_default)

@@ -1,3 +1,8 @@
+# Power Control for Lapotronic Super Capacitor
+
+## Screenshots
+
+![App Screenshot](https://i.imgur.com/dXUTW4C.png)
 
 ## Deployment
 
@@ -12,12 +17,6 @@ installer
 ```bash
 pwr
 ```
-
-
-
-## Screenshots
-
-![App Screenshot](https://i.imgur.com/dXUTW4C.png)
 
 
 ## Authors

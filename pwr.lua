@@ -91,9 +91,9 @@ function draw_legend()
 
     for loc = 0, 100, 10
     do
-        term.setCursor(offset + loc, visual_y_start + 12)
-        term.write(loc)
         term.setCursor(offset + loc, visual_y_start + 13)
+        term.write(loc)
+        term.setCursor(offset + loc, visual_y_start + 14)
         term.write("|")
     end
 end
@@ -170,27 +170,27 @@ function draw_direction(io)
     if is_neg == 1
     then
         gpu.setForeground(clr.RED)
-        term.setCursor(offset, visual_y_start + 16)
+        term.setCursor(offset, visual_y_start + 17)
         term.write(base_bar1)
-        term.setCursor(offset - 1, visual_y_start + 17)
+        term.setCursor(offset - 1, visual_y_start + 18)
         term.write(base_bar2)
-        term.setCursor(offset, visual_y_start + 18)
+        term.setCursor(offset, visual_y_start + 19)
         term.write(base_bar3)
         gpu.setForeground(fg_default)
     else
         gpu.setForeground(clr.GREEN)
-        term.setCursor(offset, visual_y_start + 16)
-        term.write(base_bar1)
         term.setCursor(offset, visual_y_start + 17)
-        term.write(base_bar2)
+        term.write(base_bar1)
         term.setCursor(offset, visual_y_start + 18)
+        term.write(base_bar2)
+        term.setCursor(offset, visual_y_start + 19)
         term.write(base_bar3)
         gpu.setForeground(fg_default)
     end
 end
 
 function draw_visuals(percent)
-  term.setCursor(offset, visual_y_start + 14)
+  term.setCursor(offset, visual_y_start + 15)
   for check = 0, 100, 1
   do
     if check <= percent
@@ -292,14 +292,17 @@ function DrawStaticScreen()
     term.write("Time till full: ")
 
 
-  
+    -- Draw wireless energy
+    term.setCursor(30, visual_y_start + 8)
+    term.write("Wireless energy: ")
+
 
     -- Draw Maintenance status
-    term.setCursor(30,visual_y_start + 9)
+    term.setCursor(30,visual_y_start + 10)
     term.write("Maintenance status:  ")
 
     -- Draw Generator Status
-    term.setCursor(30,visual_y_start + 10)
+    term.setCursor(30,visual_y_start + 11)
     term.write("Generators status:   ")
 
     -- Draw Pointline
@@ -321,6 +324,8 @@ function DrawDynamicScreen()
     local iorateout = parser(string.gsub(sensorInformation[8], "last 5 seconds", ""))
     local iorate = ioratein - iorateout
     local strInfo = sensorInformation[9]
+
+    local wirelessenergy = parser(sensorInformation[15])
     local MStatus
     if strInfo == nil then else
         y = string.find(strInfo, "§")
@@ -367,7 +372,7 @@ function DrawDynamicScreen()
     -- Draw Actual In
     term.setCursor(30 + 21, visual_y_start + 4)
     gpu.setForeground(clr.GREEN)
-    term.write(convert_value(ioratein, "A") .. " equal to " .. convert_value(ioratein, "P") .. " EU"); eol();
+    term.write(" " .. convert_value(ioratein, "A") .. " equal to " .. convert_value(ioratein, "P") .. " EU"); eol();
     gpu.setForeground(fg_default)
 
     -- Draw Actual Out
@@ -380,7 +385,7 @@ function DrawDynamicScreen()
     term.setCursor(30 + 21, visual_y_start + 6)
     if iorate ~= nil then ioratechange =  convert_value(math.abs(iorate), "A") end
     gpu.setForeground(fg_color_io)
-    if ioratechange ~= nil then term.write(ioratechange); eol(); end
+    if ioratechange ~= nil then term.write(" " .. ioratechange); eol(); end
     gpu.setForeground(fg_default)
 
 
@@ -396,22 +401,30 @@ function DrawDynamicScreen()
       term.write(" "..math.floor(full_time) .. "h"); eol();
     end    
     gpu.setForeground(fg_default)
+
+
+    -- Draw Wireless EU Status
+
+    term.setCursor(30+21, visual_y_start + 8)
+    gpu.setForeground(clr.GREEN)
+    term.write(" " .. convert_value(wirelessenergy, "E")); eol();
+    gpu.setForeground(fg_default)
     
 
 
     -- Draw Maintenance status
-    term.setCursor(30 + 21, visual_y_start + 9)
+    term.setCursor(30 + 21, visual_y_start + 10)
     if MStatus == "Working perfectly" then MColor = clr.GREEN else MColor = clr.RED end
     gpu.setForeground(MColor)
     if MColor == clr.RED then gpu.setBackground(clr.YELLOW) end
-    term.write(MStatus); eol();
+    term.write(" " .. MStatus); eol();
     gpu.setForeground(fg_default)
     gpu.setBackground(clr.BLACK)
 
     -- Draw Generator Status
-    term.setCursor(30 + 21, visual_y_start + 10)
+    term.setCursor(30 + 21, visual_y_start + 11)
     gpu.setForeground(fg_default)
-    term.write(statusRS); eol();
+    term.write(" " .. statusRS); eol();
     gpu.setForeground(fg_default)
     gpu.setBackground(clr.BLACK)
 

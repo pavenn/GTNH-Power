@@ -291,19 +291,13 @@ function DrawStaticScreen()
     term.setCursor(30, visual_y_start + 7)
     term.write("Time till full: ")
 
-
     -- Draw wireless energy
     term.setCursor(30, visual_y_start + 8)
     term.write("Wireless energy: ")
 
-
-    -- Draw Maintenance status
-    term.setCursor(30,visual_y_start + 10)
-    term.write("Maintenance status:  ")
-
-    -- Draw Generator Status
-    term.setCursor(30,visual_y_start + 11)
-    term.write("Generators status:   ")
+    -- Draw wireless I/O:
+    term.setCursor(30,visual_y_start + 9)
+    term.write("Wireless I/O:  ")
 
     -- Draw Pointline
     draw_legend()
@@ -388,7 +382,6 @@ function DrawDynamicScreen()
     if ioratechange ~= nil then term.write(" " .. ioratechange); eol(); end
     gpu.setForeground(fg_default)
 
-
     -- Draw time till empty
     term.setCursor(30+21, visual_y_start + 7)
     empty_time = ((storedenergyinit/iorate)/20)/3600
@@ -402,31 +395,44 @@ function DrawDynamicScreen()
     end    
     gpu.setForeground(fg_default)
 
-
     -- Draw Wireless EU Status
-
     term.setCursor(30+21, visual_y_start + 8)
     gpu.setForeground(clr.GREEN)
     term.write(" " .. convert_value(wirelessenergy, "E")); eol();
     gpu.setForeground(fg_default)
     
+    -- Draw wireless I/O
+    local AVG_TIME = 20
 
+    local wireless_arr = {}
+    local idx = 0
+    while idx < AVG_TIME do
+        table.insert(wireless_arr, parser(msc.getSensorInformation()[15]))
+        idx = idx + 1
+        os.sleep(1)
+    end
 
-    -- Draw Maintenance status
-    term.setCursor(30 + 21, visual_y_start + 10)
-    if MStatus == "Working perfectly" then MColor = clr.GREEN else MColor = clr.RED end
-    gpu.setForeground(MColor)
-    if MColor == clr.RED then gpu.setBackground(clr.YELLOW) end
-    term.write(" " .. MStatus); eol();
-    gpu.setForeground(fg_default)
-    gpu.setBackground(clr.BLACK)
+    local wireless_avg = 0
+    for i=1, #wireless_arr, 1 do
+        wireless_avg = wireless_avg + wireless_arr[i]
+    end
 
-    -- Draw Generator Status
-    term.setCursor(30 + 21, visual_y_start + 11)
+    wireless_avg = wireless_avg / #wireless_arr
+    local diff = wirelessenergy - wireless_avg
+
+    term.setCursor(30+21, visual_y_start + 9)
+    if diff > 0 then
+        gpu.setForeground(clr.RED)
+        term.write("-" .. convert_value(diff, "E")); eol();
+    elseif diff < 0 then
+        gpu.setForeground(clr.GREEN)
+        term.write("+" .. convert_value(-diff, "E")); eol();
+    else 
+        gpu.setForeground(clr.WHITE)
+        term.write("=" .. convert_value(diff, "E")); eol();
+    end
     gpu.setForeground(fg_default)
-    term.write(" " .. statusRS); eol();
-    gpu.setForeground(fg_default)
-    gpu.setBackground(clr.BLACK)
+
 
     -- Draw ColorScreen
     draw_visuals(percentenergy)
